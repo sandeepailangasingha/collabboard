@@ -62,7 +62,7 @@ export const initialTasks = [
   {
     id: 'task-5',
     title: 'Draft Project Requirements Document',
-    description: 'Outline Milestone 1 deliverables, component tree diagram, and state management strategy for group evaluation.',
+    description: 'Outline Sprint 1 deliverables, component tree diagram, and state management strategy for group evaluation.',
     status: 'done',
     priority: 'high',
     assignee: {

@@ -136,7 +136,7 @@ export default function BoardPage() {
           <div className="summary-left">
             <h2 className="summary-heading">Team Project Canvas</h2>
             <p className="summary-subtext">
-              Milestone 1 — Manage tasks, move cards across columns, and track team velocity.
+              Manage tasks, move cards across columns, and track team velocity.
             </p>
           </div>
 
