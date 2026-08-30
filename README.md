@@ -1,20 +1,19 @@
-# CollabBoard — Team Task Board (Milestone 1)
+# SyncBoard / CollabBoard — Team Task Board (Assignment 02 - Milestone 2)
 
-CollabBoard is a collaborative Kanban-style task management web application designed for software development teams to organize, track, and manage project tasks efficiently.
+SyncBoard (CollabBoard) is a full-stack collaborative Kanban-style task management web application designed for software development teams to organize, track, and manage project tasks efficiently.
 
-This repository represents **Milestone 1 (M1 – Static Front-End Skeleton)** of the project assignment.
+This repository represents **Assignment 02 (Milestone 2: Working REST APIs Integrated with Frontend)**.
 
 ---
 
-## 🚀 Features (Milestone 1)
+## 🚀 Key Features (Assignment 02)
 
-- **Kanban Board Columns**: To Do, Doing, and Done columns displayed side-by-side on desktop with a responsive mobile layout.
-- **Top Navigation Bar**: Features CollabBoard branding, board title, real-time search, priority filtering, and user avatar placeholder.
-- **Task Cards**: Reusable card component displaying title, description, priority badge, tags, dates, assignee, status dropdown, move controls, edit, and delete action buttons.
-- **Add & Edit Task UI**: Interactive modal form with title validation, status selection, priority, assignee, due date, and tags.
-- **Delete Confirmation UI**: Confirmation modal dialog prior to deleting tasks.
-- **Client-Side Persistence**: React `useState` & `useEffect` integrated with `localStorage` sync.
-- **Realistic Mock Data**: Pre-loaded mock tasks stored in `src/data/mockTasks.js`.
+- **Full-Stack Architecture**: React Frontend (`client/`) integrated live with Express REST API Backend (`server/`).
+- **JWT Authentication**: User registration, login authentication, and JWT bearer token profile verification (`/api/auth`).
+- **Task CRUD Endpoints**: Express REST API endpoints for fetching, creating, updating, and deleting tasks (`/api/tasks`).
+- **Kanban Workflow Columns**: To Do, Doing, and Done workflow columns with dynamic task counters and completion percentage.
+- **Glassmorphic UI**: Responsive dark mode design system with priority badges, status selectors, search bar, and priority filters.
+- **Postman API Collection**: Included in `server/postman/SyncBoard_API_Collection.json`.
 
 ---
 
@@ -22,50 +21,57 @@ This repository represents **Milestone 1 (M1 – Static Front-End Skeleton)** of
 
 ```text
 collabboard/
-├── index.html
-├── package.json
-├── vite.config.js
-├── src/
-│   ├── main.jsx
-│   ├── App.jsx
-│   ├── components/
-│   │   ├── Navbar.jsx
-│   │   ├── Board.jsx
-│   │   ├── Column.jsx
-│   │   ├── TaskCard.jsx
-│   │   ├── TaskForm.jsx
-│   │   ├── Modal.jsx
-│   │   ├── ConfirmModal.jsx
-│   │   └── Button.jsx
-│   ├── pages/
-│   │   └── BoardPage.jsx
-│   ├── data/
-│   │   └── mockTasks.js
-│   └── styles/
-│       ├── index.css
-│       ├── Navbar.css
-│       ├── Board.css
-│       ├── TaskCard.css
-│       ├── Modal.css
-│       └── Button.css
+├── client/                     # React Frontend Client (Port 5173)
+│   ├── src/
+│   │   ├── services/api.js    # REST API Integration Service
+│   │   ├── context/           # AuthContext (JWT Token State Manager)
+│   │   ├── pages/             # LoginPage.jsx, RegisterPage.jsx, BoardPage.jsx
+│   │   ├── components/        # Navbar, Board, Column, TaskCard, Modal, TaskForm
+│   │   └── styles/
+│   └── package.json
+│
+└── server/                     # Node.js & Express REST API Server (Port 5000)
+    ├── src/
+    │   ├── controllers/       # authController.js, taskController.js
+    │   ├── middleware/        # authMiddleware.js (JWT Bearer Guard)
+    │   ├── models/            # userModel.js, taskModel.js (Data Store)
+    │   ├── routes/            # authRoutes.js, taskRoutes.js
+    │   └── server.js          # Express Server Entry Point
+    ├── postman/               # Postman Collection JSON
+    └── package.json
 ```
 
 ---
 
-## 🛠️ Setup & Local Development
+## 🛠️ Setup & Running Locally
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+### 1. Start Express REST API Backend
+```bash
+cd server
+npm install
+npm start
+```
+*Backend Server runs at `http://localhost:5000/api`*
 
-2. **Run development server**:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:5173](http://localhost:5173) in your browser.
+### 2. Start React Frontend Client
+```bash
+cd client
+npm install
+npm run dev
+```
+*Client opens at `http://localhost:5173/`*
 
-3. **Build for production**:
-   ```bash
-   npm run build
-   ```
+---
+
+## 🔑 Demo Accounts
+
+- **Team Lead**: `sandeepa@example.com` / `password123`
+- **UI Designer**: `amara@example.com` / `password123`
+- **Developer**: `kasun@example.com` / `password123`
+
+---
+
+## 🏷️ Assignment 02 Release Tag
+
+- **Git Tag**: `v2.0.0-m2`
+- **Tag Title**: `Assignment 02 - Working REST APIs (with mock data) Integrated with Frontend`
