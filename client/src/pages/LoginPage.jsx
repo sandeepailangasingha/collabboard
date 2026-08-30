@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import Button from '../components/Button';
-import { Kanban, LogIn, Lock, Mail } from 'lucide-react';
+import { Kanban, LogIn } from 'lucide-react';
 import '../styles/Auth.css';
 
 export default function LoginPage({ onSwitchToRegister }) {
@@ -11,16 +11,15 @@ export default function LoginPage({ onSwitchToRegister }) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email || !password) {
+  const executeLogin = async (userEmail, userPassword) => {
+    if (!userEmail || !userPassword) {
       setError('Please provide email and password');
       return;
     }
     setError('');
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(userEmail.trim(), userPassword.trim());
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {
@@ -28,9 +27,15 @@ export default function LoginPage({ onSwitchToRegister }) {
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    executeLogin(email, password);
+  };
+
   const handleQuickLogin = (demoEmail) => {
     setEmail(demoEmail);
     setPassword('password123');
+    executeLogin(demoEmail, 'password123');
   };
 
   return (
@@ -41,7 +46,7 @@ export default function LoginPage({ onSwitchToRegister }) {
             <Kanban size={26} />
           </div>
           <h1 className="auth-title">Welcome to CollabBoard</h1>
-          <p className="auth-subtitle">Sign in to manage team tasks and collaborate in real-time.</p>
+          <p className="auth-subtitle">Sign in to manage team tasks and collaborate via Express REST API.</p>
         </div>
 
         {error && <div className="auth-alert">{error}</div>}
@@ -77,23 +82,26 @@ export default function LoginPage({ onSwitchToRegister }) {
             size="lg"
             disabled={submitting}
             icon={LogIn}
-            className="w-full"
           >
             {submitting ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
         <div className="demo-creds">
-          <strong>Demo Login Credentials:</strong>
+          <strong>Quick Demo Accounts (Click to Login):</strong>
           <br />
-          Email: <span className="auth-link" onClick={() => handleQuickLogin('sandeepa@example.com')}>sandeepa@example.com</span>
+          👉 <button type="button" className="auth-link" onClick={() => handleQuickLogin('sandeepa@example.com')}>sandeepa@example.com (Team Lead)</button>
+          <br />
+          👉 <button type="button" className="auth-link" onClick={() => handleQuickLogin('amara@example.com')}>amara@example.com (UI Designer)</button>
+          <br />
+          👉 <button type="button" className="auth-link" onClick={() => handleQuickLogin('kasun@example.com')}>kasun@example.com (Developer)</button>
           <br />
           Password: <code>password123</code>
         </div>
 
         <div className="auth-footer">
           Don't have an account?{' '}
-          <button className="auth-link" onClick={onSwitchToRegister}>
+          <button type="button" className="auth-link" onClick={onSwitchToRegister}>
             Register here
           </button>
         </div>
