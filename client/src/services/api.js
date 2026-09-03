@@ -8,6 +8,14 @@ const getAuthHeaders = () => {
   };
 };
 
+const normalize = (item) => {
+  if (!item) return item;
+  return {
+    ...item,
+    id: item._id || item.id,
+  };
+};
+
 export const apiService = {
   // Auth API Calls
   login: async (email, password) => {
@@ -42,9 +50,42 @@ export const apiService = {
     return data;
   },
 
-  // Task API Calls
+  // Project API Calls (Milestone 3 - Multiple Projects)
+  getProjects: async () => {
+    const res = await fetch(`${API_BASE_URL}/projects`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to fetch projects');
+    return (data.projects || []).map(normalize);
+  },
+
+  createProject: async (projectData) => {
+    const res = await fetch(`${API_BASE_URL}/projects`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(projectData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to create project');
+    return normalize(data.project);
+  },
+
+  deleteProject: async (id) => {
+    const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to delete project');
+    return true;
+  },
+
+  // Task API Calls (MongoDB Atlas with projectId filter)
   getTasks: async (filters = {}) => {
     const queryParams = new URLSearchParams();
+    if (filters.projectId) queryParams.append('projectId', filters.projectId);
     if (filters.status && filters.status !== 'all') queryParams.append('status', filters.status);
     if (filters.priority && filters.priority !== 'all') queryParams.append('priority', filters.priority);
     if (filters.search) queryParams.append('search', filters.search);
@@ -55,7 +96,7 @@ export const apiService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to fetch tasks');
-    return data.data || [];
+    return (data.tasks || []).map(normalize);
   },
 
   createTask: async (taskData) => {
@@ -66,7 +107,7 @@ export const apiService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to create task');
-    return data.data;
+    return normalize(data.task);
   },
 
   updateTask: async (id, updates) => {
@@ -77,7 +118,7 @@ export const apiService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to update task');
-    return data.data;
+    return normalize(data.task);
   },
 
   deleteTask: async (id) => {

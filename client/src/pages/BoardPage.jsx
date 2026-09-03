@@ -4,13 +4,21 @@ import Board from '../components/Board';
 import Modal from '../components/Modal';
 import TaskForm from '../components/TaskForm';
 import ConfirmModal from '../components/ConfirmModal';
+import ProjectModal from '../components/ProjectModal';
 import { AuthContext } from '../context/AuthContext';
 import { apiService } from '../services/api';
-import { CheckCircle2, Clock, Circle, Sparkles, RotateCcw, LogOut } from 'lucide-react';
+import { CheckCircle2, Clock, Circle, Sparkles, RotateCcw } from 'lucide-react';
 import '../styles/Board.css';
 
 export default function BoardPage() {
   const { user, logout } = useContext(AuthContext);
+
+  // Projects State (Milestone 3 Multi-Project)
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  // Tasks & Loading State
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,24 +32,59 @@ export default function BoardPage() {
   const [defaultStatus, setDefaultStatus] = useState('todo');
   const [deletingTask, setDeletingTask] = useState(null);
 
-  // Fetch tasks from Express REST API
+  // 1. Fetch all projects on mount
+  const fetchProjects = async () => {
+    try {
+      const projs = await apiService.getProjects();
+      setProjects(projs);
+      if (projs.length > 0 && !selectedProject) {
+        setSelectedProject(projs[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch projects from MongoDB Atlas', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  // 2. Fetch tasks for selected project
   const fetchTasks = async () => {
+    if (!selectedProject) return;
     try {
       setLoading(true);
-      const data = await apiService.getTasks({ search: searchTerm, priority: priorityFilter });
+      const data = await apiService.getTasks({
+        projectId: selectedProject.id,
+        search: searchTerm,
+        priority: priorityFilter,
+      });
       setTasks(data);
     } catch (err) {
-      console.error('Failed to fetch tasks from API', err);
+      console.error('Failed to fetch tasks from MongoDB Atlas', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, [searchTerm, priorityFilter]);
+    if (selectedProject) {
+      fetchTasks();
+    }
+  }, [selectedProject, searchTerm, priorityFilter]);
 
-  // Handlers for Add / Edit Modal
+  // Handlers for Projects
+  const handleCreateProject = async (projectData) => {
+    try {
+      const created = await apiService.createProject(projectData);
+      setProjects((prev) => [created, ...prev]);
+      setSelectedProject(created);
+    } catch (err) {
+      alert(err.message || 'Failed to create project');
+    }
+  };
+
+  // Handlers for Add / Edit Task Modal
   const handleOpenAddModal = (status = 'todo') => {
     setEditingTask(null);
     setDefaultStatus(status);
@@ -59,14 +102,21 @@ export default function BoardPage() {
   };
 
   const handleSaveTask = async (taskData) => {
+    if (!selectedProject) {
+      alert('Please select or create a project first');
+      return;
+    }
     try {
       if (editingTask) {
-        // Update via API
+        // Update via MongoDB Atlas API
         const updated = await apiService.updateTask(editingTask.id, taskData);
         setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? updated : t)));
       } else {
-        // Create via API
-        const created = await apiService.createTask(taskData);
+        // Create via MongoDB Atlas API
+        const created = await apiService.createTask({
+          ...taskData,
+          projectId: selectedProject.id,
+        });
         setTasks((prev) => [created, ...prev]);
       }
       handleCloseModal();
@@ -92,22 +142,22 @@ export default function BoardPage() {
     }
   };
 
-  // Quick Status change from card select or move arrows
+  // Quick Status change
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       const updated = await apiService.updateTask(taskId, { status: newStatus });
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
     } catch (err) {
-      console.error('Failed to update status', err);
+      console.error('Failed to update status in MongoDB Atlas', err);
     }
   };
 
-  // Reset/Refresh tasks handler
+  // Reset/Refresh tasks
   const handleRefreshData = () => {
     fetchTasks();
   };
 
-  // Calculate metrics
+  // Metrics
   const todoCount = tasks.filter((t) => t.status === 'todo').length;
   const doingCount = tasks.filter((t) => t.status === 'doing').length;
   const doneCount = tasks.filter((t) => t.status === 'done').length;
@@ -117,6 +167,10 @@ export default function BoardPage() {
   return (
     <div className="board-page-container">
       <Navbar
+        projects={projects}
+        selectedProject={selectedProject}
+        onSelectProject={setSelectedProject}
+        onOpenNewProjectModal={() => setIsProjectModalOpen(true)}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         priorityFilter={priorityFilter}
@@ -130,9 +184,22 @@ export default function BoardPage() {
         {/* Board Header & Progress Summary Bar */}
         <div className="board-summary-bar">
           <div className="summary-left">
-            <h2 className="summary-heading">Team Project Canvas</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <div
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  backgroundColor: selectedProject?.color || '#6366f1',
+                }}
+              />
+              <h2 className="summary-heading">
+                {selectedProject ? selectedProject.name : 'Team Project Canvas'}
+              </h2>
+            </div>
             <p className="summary-subtext">
-              Manage tasks, move cards across columns, and track team velocity via Express REST API.
+              {selectedProject?.description ||
+                'Persistent multi-project task board with MongoDB Atlas Cloud Database.'}
             </p>
           </div>
 
@@ -159,17 +226,19 @@ export default function BoardPage() {
             <button
               className="reset-data-btn"
               onClick={handleRefreshData}
-              title="Refresh tasks from Express REST API"
+              title="Refresh tasks from MongoDB Atlas"
             >
               <RotateCcw size={14} />
-              <span>Refresh API</span>
+              <span>Refresh Atlas</span>
             </button>
           </div>
         </div>
 
         {/* Kanban Board Grid */}
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading tasks from Express REST API...</div>
+          <div className="text-center py-12 text-gray-400">
+            Connecting to MongoDB Atlas Cloud Database...
+          </div>
         ) : (
           <Board
             tasks={tasks}
@@ -202,6 +271,13 @@ export default function BoardPage() {
         onClose={() => setDeletingTask(null)}
         onConfirm={handleConfirmDelete}
         taskTitle={deletingTask ? deletingTask.title : ''}
+      />
+
+      {/* New Project Modal (Milestone 3) */}
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        onSave={handleCreateProject}
       />
     </div>
   );
