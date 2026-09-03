@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from './Button';
-import { Kanban, Plus, Search, Filter, User, LogOut } from 'lucide-react';
+import { Kanban, Plus, Search, Filter, User, LogOut, ChevronDown, FolderPlus, Database } from 'lucide-react';
 import '../styles/Navbar.css';
 
 export default function Navbar({
-  boardName = 'Group Project Alpha — Sprint 1',
+  projects = [],
+  selectedProject,
+  onSelectProject,
+  onOpenNewProjectModal,
   searchTerm,
   onSearchChange,
   priorityFilter,
@@ -13,10 +16,12 @@ export default function Navbar({
   currentUser,
   onLogout,
 }) {
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+
   return (
     <header className="navbar">
       <div className="navbar-container">
-        {/* Left: Brand / Logo & Board Title */}
+        {/* Left: Brand / Logo & Project Selector */}
         <div className="navbar-left">
           <div className="brand-logo">
             <div className="logo-icon-wrapper">
@@ -27,9 +32,73 @@ export default function Navbar({
 
           <div className="navbar-divider"></div>
 
-          <div className="board-info">
-            <span className="board-badge">REST API CONNECTED</span>
-            <h1 className="board-title">{boardName}</h1>
+          {/* Multiple Project Selector Dropdown */}
+          <div className="project-selector-wrapper" style={{ position: 'relative' }}>
+            <div
+              className="project-selector-btn"
+              onClick={() => setProjectDropdownOpen(!projectDropdownOpen)}
+              title="Click to switch or create projects"
+            >
+              <div
+                className="project-color-dot"
+                style={{ backgroundColor: selectedProject?.color || '#6366f1' }}
+              />
+              <div className="project-meta">
+                <div className="project-badge-row">
+                  <span className="board-badge atlas-badge">
+                    <Database size={10} style={{ display: 'inline', marginRight: '3px' }} />
+                    MONGODB ATLAS
+                  </span>
+                </div>
+                <h1 className="board-title project-title-text">
+                  {selectedProject?.name || 'Project Alpha'}
+                  <ChevronDown size={14} className="dropdown-arrow" />
+                </h1>
+              </div>
+            </div>
+
+            {projectDropdownOpen && (
+              <div className="project-dropdown-menu">
+                <div className="dropdown-header">
+                  <span>Switch Project ({projects.length})</span>
+                </div>
+                <div className="dropdown-list">
+                  {projects.map((proj) => (
+                    <div
+                      key={proj.id}
+                      className={`dropdown-item ${selectedProject?.id === proj.id ? 'active' : ''}`}
+                      onClick={() => {
+                        onSelectProject(proj);
+                        setProjectDropdownOpen(false);
+                      }}
+                    >
+                      <div
+                        className="project-item-dot"
+                        style={{ backgroundColor: proj.color || '#6366f1' }}
+                      />
+                      <div className="dropdown-item-info">
+                        <span className="dropdown-item-name">{proj.name}</span>
+                        {proj.description && (
+                          <span className="dropdown-item-desc">{proj.description.slice(0, 45)}...</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="dropdown-footer">
+                  <button
+                    className="create-project-btn"
+                    onClick={() => {
+                      setProjectDropdownOpen(false);
+                      onOpenNewProjectModal();
+                    }}
+                  >
+                    <FolderPlus size={14} />
+                    <span>+ New Project</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
