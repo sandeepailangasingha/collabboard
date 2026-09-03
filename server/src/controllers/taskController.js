@@ -1,76 +1,84 @@
-import { TaskModel } from '../models/taskModel.js';
+import Task from '../models/Task.js';
 
-// @desc    Get all tasks with optional filtering
-// @route   GET /api/tasks
-export const getTasks = (req, res) => {
-  const { status, priority, search } = req.query;
-  const tasks = TaskModel.findAll({ status, priority, search });
-  return res.json({
-    success: true,
-    count: tasks.length,
-    data: tasks,
-  });
+// @desc  Get all tasks (optionally filter by project)
+// @route GET /api/tasks?projectId=xxx&status=xxx&priority=xxx&search=xxx
+export const getTasks = async (req, res) => {
+  try {
+    const { projectId, status, priority, search } = req.query;
+    const filter = {};
+
+    if (projectId) filter.project = projectId;
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+    if (search) filter.title = { $regex: search, $options: 'i' };
+
+    const tasks = await Task.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, count: tasks.length, tasks });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-// @desc    Get single task by ID
-// @route   GET /api/tasks/:id
-export const getTaskById = (req, res) => {
-  const task = TaskModel.findById(req.params.id);
-  if (!task) {
-    return res.status(404).json({ message: 'Task not found' });
+// @desc  Get single task
+// @route GET /api/tasks/:id
+export const getTaskById = async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    res.json({ success: true, task });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  return res.json({ success: true, data: task });
 };
 
-// @desc    Create new task
-// @route   POST /api/tasks
-export const createTask = (req, res) => {
-  const { title, description, status, priority, assignee, dueDate, tags } = req.body;
+// @desc  Create new task
+// @route POST /api/tasks
+export const createTask = async (req, res) => {
+  try {
+    const { title, description, status, priority, assignee, dueDate, tags, projectId } = req.body;
+    if (!title) return res.status(400).json({ success: false, message: 'Title is required' });
+    if (!projectId) return res.status(400).json({ success: false, message: 'Project ID is required' });
 
-  if (!title || !title.trim()) {
-    return res.status(400).json({ message: 'Task title is required' });
+    const task = await Task.create({
+      title,
+      description: description || '',
+      status: status || 'todo',
+      priority: priority || 'medium',
+      assignee: assignee || '',
+      dueDate: dueDate || '',
+      tags: tags || [],
+      project: projectId,
+      createdBy: req.user?.id,
+    });
+
+    res.status(201).json({ success: true, task });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-
-  const newTask = TaskModel.create({
-    title: title.trim(),
-    description,
-    status,
-    priority,
-    assignee,
-    dueDate,
-    tags,
-  });
-
-  return res.status(201).json({
-    success: true,
-    message: 'Task created successfully',
-    data: newTask,
-  });
 };
 
-// @desc    Update existing task
-// @route   PUT /api/tasks/:id
-export const updateTask = (req, res) => {
-  const updatedTask = TaskModel.update(req.params.id, req.body);
-  if (!updatedTask) {
-    return res.status(404).json({ message: 'Task not found' });
+// @desc  Update task
+// @route PUT /api/tasks/:id
+export const updateTask = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+      new: true, runValidators: true,
+    });
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    res.json({ success: true, task });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  return res.json({
-    success: true,
-    message: 'Task updated successfully',
-    data: updatedTask,
-  });
 };
 
-// @desc    Delete a task
-// @route   DELETE /api/tasks/:id
-export const deleteTask = (req, res) => {
-  const success = TaskModel.delete(req.params.id);
-  if (!success) {
-    return res.status(404).json({ message: 'Task not found' });
+// @desc  Delete task
+// @route DELETE /api/tasks/:id
+export const deleteTask = async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+    res.json({ success: true, message: 'Task deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  return res.json({
-    success: true,
-    message: 'Task deleted successfully',
-  });
 };
