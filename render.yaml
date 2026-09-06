@@ -1,0 +1,14 @@
+﻿services:
+  - type: web
+    name: collabboard
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        value: mongodb+srv://sandeepakavindu88_admin:AtlasM3Password2026!@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0
+      - key: JWT_SECRET
+        value: syncboard_jwt_secret_2026_collabboard

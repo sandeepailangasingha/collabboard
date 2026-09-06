@@ -2,11 +2,18 @@
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 import connectDB from './config/db.js';
 import { PORT } from './config/env.js';
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.resolve(__dirname, '../../client/dist');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,7 +71,19 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// 404 Handler
+// Serve Frontend SPA in Production
+if (fs.existsSync(clientDistPath)) {
+  console.log(`Serving static client from: ${clientDistPath}`);
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
+// 404 Handler for API routes
 app.use((req, res) => {
   res.status(404).json({ message: 'API Endpoint Not Found' });
 });
