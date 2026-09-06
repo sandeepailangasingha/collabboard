@@ -10,6 +10,18 @@ jobs:
   backend-tests:
     name: Backend API & WebSocket Tests
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -26,29 +38,45 @@ jobs:
           cd server
           npm ci || npm install
 
-      - name: Start Server in Background for Test Suite
+      - name: Seed Test User into Local MongoDB
+        run: |
+          mongosh mongodb://localhost:27017/syncboard_test --eval '
+            db.users.deleteMany({ email: "sandeepa@example.com" });
+            db.users.insertOne({
+              name: "Sandeepa Ilangasingha",
+              email: "sandeepa@example.com",
+              password: "password123",
+              role: "Admin",
+              avatarColor: "#6366f1",
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+            print("Test user seeded OK");
+          '
+
+      - name: Start Server in Background
         env:
           PORT: 5000
           JWT_SECRET: syncboard_test_jwt_secret
-          MONGO_URI: mongodb+srv://sandeepakavindu88_admin:AtlasM3Password2026!@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0
+          MONGO_URI: mongodb://localhost:27017/syncboard_test
           NODE_ENV: test
         run: |
           cd server
           node src/server.js &
-          echo "Server started in background (PID $!)"
+          echo "Server started (PID $!)"
 
       - name: Wait for Server to be Ready
         run: |
           echo "Waiting for server on port 5000..."
           for i in $(seq 1 30); do
-            if curl -s http://localhost:5000/api > /dev/null 2>&1; then
-              echo "Server is ready after ${i}s"
+            if curl -sf http://localhost:5000/api > /dev/null 2>&1; then
+              echo "Server ready after ${i}s"
               break
             fi
-            echo "  Attempt $i/30: server not ready yet..."
+            echo "  Attempt $i/30 - not ready yet..."
             sleep 1
           done
-          curl -s http://localhost:5000/api || (echo "Server failed to start" && exit 1)
+          curl -sf http://localhost:5000/api || (echo "ERROR: Server never became ready" && exit 1)
 
       - name: Run Backend Integration & Unit Tests
         env:
