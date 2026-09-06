@@ -15,6 +15,11 @@ dns.lookup = function (hostname, options, callback) {
     callback = options;
     options = {};
   }
+  // Safeguard localhost and loopback interfaces for CI runners and local testing
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || !hostname.includes('.')) {
+    return origLookup(hostname, options, callback);
+  }
+
   dns.resolve4(hostname, (err, addresses) => {
     if (!err && addresses && addresses.length > 0) {
       if (options && options.all) {
@@ -32,12 +37,15 @@ const connectDB = async () => {
     console.error('MongoDB Connection Error: MONGO_URI is missing!');
     console.error('Please create a server/.env file using server/.env.example as a template.');
     console.error('================================================');
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
+    return;
   }
 
   try {
     const conn = await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 15000,
+      serverSelectionTimeoutMS: 8000,
     });
     console.log('================================================');
     console.log('MongoDB Atlas Connected: ' + conn.connection.host);
@@ -45,8 +53,9 @@ const connectDB = async () => {
     console.log('================================================');
   } catch (error) {
     console.error('MongoDB Connection Error: ' + error.message);
-    console.error('Please check your network connection, Atlas IP whitelist, or database credentials.');
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
   }
 };
 

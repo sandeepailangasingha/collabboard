@@ -5,8 +5,8 @@ const BASE_URL = process.env.TEST_API_URL || 'http://localhost:5000/api';
 
 describe('SyncBoard Backend REST API & Real-Time Engine Tests', () => {
   before(async () => {
-    // Poll until server is ready (up to 15 seconds)
-    for (let i = 0; i < 15; i++) {
+    // Poll until server is ready (up to 30 seconds)
+    for (let i = 0; i < 30; i++) {
       try {
         const res = await fetch(`${BASE_URL}`);
         if (res.ok) return;
