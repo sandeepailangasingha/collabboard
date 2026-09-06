@@ -236,3 +236,116 @@ If a teammate or evaluator encounters a **MongoDB Connection Error**, check the 
 - `v1.0.0-m1`: Milestone 1 — Static Front-End Skeleton
 - `v2.0.0-m2`: Milestone 2 — Working REST APIs Integrated with Frontend
 - `v3.0.0-m3`: Milestone 3 — MongoDB Atlas Cloud Persistence & Multiple Projects
+
+---
+
+## 🏛️ System Architecture Diagram (Session 5 - DevOps & Real-Time)
+
+SyncBoard employs an event-driven, full-stack client-server architecture with dual communication protocols (REST over HTTP for persistent transactional operations, and WebSockets via Socket.io for instantaneous multi-user state synchronization):
+
+```mermaid
+graph TD
+    subgraph Client Tier ["Frontend Client (React 19 + Vite 8)"]
+        UI["Kanban Board UI (SPA)"]
+        SocketClient["Socket.io Client Hook"]
+        ClientStore["Client Cache (localStorage)"]
+    end
+
+    subgraph Gateway ["Reverse Proxy / Load Balancer"]
+        Nginx["Nginx Alpine Container (Port 80 / 5173)"]
+    end
+
+    subgraph Server Tier ["Backend Tier (Express 4 + Node.js 20)"]
+        ExpressApp["Express REST API (Port 5000)"]
+        SocketServer["Socket.io WebSocket Server"]
+        AuthMiddleware["JWT Authentication Guard"]
+    end
+
+    subgraph Data Tier ["Cloud Data Persistence Tier"]
+        Atlas[("MongoDB Atlas Cloud Cluster0 (M0 ReplicaSet)")]
+    end
+
+    UI -->|"User Actions"| SocketClient
+    UI -->|"Offline Fallback"| ClientStore
+    Nginx -->|"Static Assets / SPA Routing"| UI
+    Nginx -->|"Proxy /api"| ExpressApp
+    Nginx -->|"Proxy /socket.io"| SocketServer
+    
+    UI -->|"HTTP CRUD Requests"| ExpressApp
+    SocketClient <-->|"Bidirectional Events (task:updated, etc.)"| SocketServer
+    ExpressApp -->|"Protect Middleware"| AuthMiddleware
+    ExpressApp -->|"Mongoose ODM Queries"| Atlas
+```
+
+---
+
+## ⚡ Real-Time Engine & Live Multi-User Synchronization (Session 5 - Criterion 5)
+
+SyncBoard features full real-time collaboration powered by **Socket.io**:
+- **Project-Scoped Rooms**: When a user switches projects, their socket client automatically joins `project_<projectId>`.
+- **Live Event Propagation**:
+  - `task:created`: Instantly renders newly created tasks on all connected teammate screens without manual page refresh.
+  - `task:updated`: Broadcasts drag-and-drop column moves (`todo` ➔ `doing` ➔ `done`), title changes, and assignments live.
+  - `task:deleted`: Removes deleted cards in real time across all open sessions.
+  - `project:created`: Updates the project dropdown selector across all active browser windows.
+- **Visual Live Sync Indicator**: Active connection status is highlighted with a pulsating green indicator (`Live Socket.io Sync`) and transient notification toasts (`⚡ Real-time sync: Task moved live`).
+
+---
+
+## 🐳 Docker Compose Deployment (DevOps - Single Command Spin-up)
+
+SyncBoard is fully containerized. Evaluators and teammates can spin up the entire application stack from a clean clone with a single command:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/sandeepailangasingha/collabboard.git
+cd collabboard
+
+# 2. Build and launch all services via Docker Compose
+docker compose up --build
+```
+
+- **Frontend Application**: Available at `http://localhost:5173` (or `http://localhost:80`)
+- **Backend REST API**: Available at `http://localhost:5000/api`
+- **MongoDB Atlas**: Connects automatically to cloud ReplicaSet
+
+To stop the containers:
+```bash
+docker compose down
+```
+
+---
+
+## 🧪 Automated Testing & Continuous Integration (CI Pipeline)
+
+The project includes an automated test suite and a GitHub Actions Continuous Integration pipeline:
+
+```bash
+# Run Backend Integration & Real-Time Tests
+cd server
+npm test
+
+# Run Frontend Linter & Build Validation
+cd client
+npm run lint
+npm run build
+```
+
+- **GitHub Actions CI Workflow**: Located at `.github/workflows/ci.yml`. On every push and pull request, the pipeline automatically spins up the server in a containerized environment, validates all 6 API test assertions, lints the codebase, and checks production builds, guaranteeing a **Green Pipeline**.
+
+---
+
+## ⚠️ Known Limitations & What Does Not Work Yet (Submission Checklist Item 3)
+
+In accordance with the Final Submission Checklist, the following non-critical limitations and future enhancements are transparently documented:
+
+1. **Third-Party OAuth Providers**: While secure JWT authentication with bcrypt password hashing is fully operational, social logins (Google / GitHub OAuth) are currently not configured.
+2. **Automatic Background Offline Sync Queue**: While client-side caching safely preserves task drafts and displays cached cards during network drops, changes made entirely offline require manual reconnection retry via the "Retry Atlas Connection" button rather than a background service worker queue.
+3. **Binary File Uploads**: Task cards support text descriptions, priorities, tags, and assignees, but direct file attachments (such as PDF or image file uploads to AWS S3) are not yet integrated.
+
+---
+
+## 📄 Team Reflection
+
+A comprehensive, one-page team reflection detailing what worked well, what we would do differently, and the specific workload division among all 7 contributors is documented in:  
+👉 **[docs/team_reflection.md](docs/team_reflection.md)**
