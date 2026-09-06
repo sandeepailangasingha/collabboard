@@ -12,16 +12,6 @@
 
 ---
 
-## 🎯 Final Submission Checklist Compliance (Session 5 - Launch)
-
-| # | Submission Criterion | Status | Implementation Details |
-|---|----------------------|:------:|------------------------|
-| **1** | **Repository link, history intact** | ✅ Verified | Complete commit history with all team contributors preserved at sandeepailangasingha/collabboard. |
-| **2** | **The deployed URL** | ✅ Live | Publicly accessible at **https://collabboard-fg34.onrender.com/** |
-| **3** | **README with setup, architecture & limitations** | ✅ Verified | Architecture diagram, Docker setup, and explicit limitations section included below. |
-| **4** | **A green pipeline at submission time** | ✅ Verified | Automated GitHub Actions workflow passing cleanly on main. |
-| **5** | **docker compose up works from a clean clone** | ✅ Verified | Single-command Docker spin-up via root docker-compose.yml. |
-| **6** | **One-page team reflection** | ✅ Verified | Detailed workload division and retro documented in docs/team_reflection.md. |
 
 ---
 
