@@ -1,4 +1,4 @@
-import Project from '../models/Project.js';
+﻿import Project from '../models/Project.js';
 import Task from '../models/Task.js';
 
 // @desc  Get all projects for user
@@ -43,6 +43,12 @@ export const createProject = async (req, res) => {
       members: req.user?.id ? [req.user.id] : [],
     });
 
+    // Real-time broadcast
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('project:created', project);
+    }
+
     res.status(201).json({ success: true, project });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -57,6 +63,12 @@ export const updateProject = async (req, res) => {
       new: true, runValidators: true,
     });
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('project:updated', project);
+    }
+
     res.json({ success: true, project });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -70,6 +82,12 @@ export const deleteProject = async (req, res) => {
     const project = await Project.findByIdAndDelete(req.params.id);
     if (!project) return res.status(404).json({ success: false, message: 'Project not found' });
     await Task.deleteMany({ project: req.params.id });
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('project:deleted', { projectId: req.params.id });
+    }
+
     res.json({ success: true, message: 'Project and all tasks deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

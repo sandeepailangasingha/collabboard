@@ -1,4 +1,4 @@
-import Task from '../models/Task.js';
+﻿import Task from '../models/Task.js';
 
 // @desc  Get all tasks (optionally filter by project)
 // @route GET /api/tasks?projectId=xxx&status=xxx&priority=xxx&search=xxx
@@ -51,6 +51,18 @@ export const createTask = async (req, res) => {
       createdBy: req.user?.id,
     });
 
+    // Real-time broadcast via Socket.io
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`project_${projectId}`).emit('task:created', task);
+      io.emit('task:activity', {
+        action: 'created',
+        taskTitle: task.title,
+        userName: req.user?.name || 'A teammate',
+        projectId,
+      });
+    }
+
     res.status(201).json({ success: true, task });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -65,6 +77,20 @@ export const updateTask = async (req, res) => {
       new: true, runValidators: true,
     });
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    // Real-time broadcast via Socket.io
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`project_${task.project}`).emit('task:updated', task);
+      io.emit('task:activity', {
+        action: 'updated',
+        taskTitle: task.title,
+        status: task.status,
+        userName: req.user?.name || 'A teammate',
+        projectId: task.project,
+      });
+    }
+
     res.json({ success: true, task });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -77,6 +103,22 @@ export const deleteTask = async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    // Real-time broadcast via Socket.io
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`project_${task.project}`).emit('task:deleted', {
+        taskId: req.params.id,
+        projectId: task.project,
+      });
+      io.emit('task:activity', {
+        action: 'deleted',
+        taskTitle: task.title,
+        userName: req.user?.name || 'A teammate',
+        projectId: task.project,
+      });
+    }
+
     res.json({ success: true, message: 'Task deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
