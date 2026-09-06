@@ -1,0 +1,28 @@
+﻿version: '3.8'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: syncboard_server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb+srv://sandeepakavindu88_admin:AtlasM3Password2026!@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0
+      - JWT_SECRET=syncboard_jwt_secret_2026_collabboard
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: syncboard_client
+    ports:
+      - "80:80"
+      - "5173:80"
+    depends_on:
+      - server
+    restart: unless-stopped
