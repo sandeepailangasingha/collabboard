@@ -130,6 +130,108 @@ collabboard/
 
 ---
 
+---
+
+## 📊 Database Schema & Entity-Relationship (ER) Diagram (Milestone 3 - Step 5)
+
+The application models its persistent data in MongoDB Atlas using Mongoose ODM with strong referential integrity, foreign keys, timestamps, and schema validations across four interconnected collections:
+
+![SyncBoard ER Diagram](docs/database_schema_diagram.png)
+
+### Mermaid Entity-Relationship (ER) Definition:
+
+```mermaid
+erDiagram
+    USER ||--o{ PROJECT : "owns / creates (1:N)"
+    USER }o--o{ PROJECT : "participates as member (M:N)"
+    PROJECT ||--|{ COLUMN : "contains workflow stages (1:N)"
+    PROJECT ||--o{ TASK : "groups tasks (1:N)"
+    USER ||--o{ TASK : "creates task (1:N)"
+
+    USER {
+        ObjectId _id PK
+        string name "Full Name"
+        string email "Unique, Lowercase"
+        string password "Hashed Password"
+        string role "Team Member / Lead"
+        string avatarColor "Hex Palette"
+        date createdAt
+        date updatedAt
+    }
+
+    PROJECT {
+        ObjectId _id PK
+        string name "Board / Project Title"
+        string description "Workspace Description"
+        string color "Theme Hex Color"
+        ObjectId owner FK "Ref: User"
+        Array members FK "Array of User ObjectIds"
+        string status "active | archived"
+        date createdAt
+        date updatedAt
+    }
+
+    COLUMN {
+        ObjectId _id PK
+        string title "To Do | Doing | Done"
+        string statusKey "todo | doing | done"
+        number order "Display sequence"
+        string color "Status color hex"
+        ObjectId board FK "Ref: Project"
+    }
+
+    TASK {
+        ObjectId _id PK
+        string title "Task Title (Max 200 chars)"
+        string description "Task details"
+        string status "todo | doing | done"
+        string priority "low | medium | high"
+        string assignee "Assigned member name"
+        string dueDate "ISO Date string"
+        Array tags "Array of label strings"
+        ObjectId project FK "Ref: Project (Required)"
+        ObjectId createdBy FK "Ref: User"
+        date createdAt
+        date updatedAt
+    }
+```
+
+---
+
+## ⚡ Client-Side Caching & Network Drop Resilience (Milestone 3 - Step 6)
+
+SyncBoard integrates client-side storage (`localStorage`) in the React frontend to maintain high availability and seamless user experience during brief network drops or temporary server disconnects:
+
+1. **Board State Caching**:
+   - Whenever projects or board tasks are fetched from MongoDB Atlas, they are serialized and cached in client-side storage (`syncboard_cached_projects` and `syncboard_cached_tasks_<projectId>`).
+   - If a network drop occurs (`navigator.onLine === false` or API network failure), the board seamlessly loads and renders from the client cache, displaying an informative banner:
+     `📶 Client-Side Caching Active (Step 6): Displaying locally cached board state from localStorage.`
+
+2. **In-Progress Work Safeguarding (Draft Caching)**:
+   - When drafting a new task in `TaskForm`, every keystroke is preserved in local storage under `syncboard_task_draft`.
+   - If the user accidentally closes the browser tab or loses connection, the in-progress work is automatically restored when reopening the dialog.
+
+3. **Offline State Persistence & Auto-Reconnection**:
+   - Status changes and task edits made during temporary drops update the local cache immediately.
+   - The application listens to `window.addEventListener('online')` to automatically reconnect and re-sync with MongoDB Atlas once connection is restored.
+
+---
+
+## 🛠️ Database Connection & Troubleshooting Guide
+
+If a teammate or evaluator encounters a **MongoDB Connection Error**, check the following common causes:
+
+1. **Missing `.env` file after `git clone`**:
+   - Because `.env` is git-ignored for credential security, fresh clones do not automatically contain `server/.env`.
+   - **Fix**: Copy `server/.env.example` to `server/.env`, or start the server directly; `server/src/config/env.js` contains an automatic fallback to the live Atlas cluster.
+
+2. **DNS SRV Resolution Issues on Windows / Specific ISPs**:
+   - Some local routers or ISPs block port 53 SRV DNS queries (`_mongodb._tcp.cluster0...`), causing `querySrv ECONNREFUSED`.
+   - **Fix**: The backend in `server/src/config/db.js` is pre-configured with Google DNS (`8.8.8.8`) resolver and an automated fallback to the direct 3-host ReplicaSet URI (`DIRECT_REPLICA_URI`) on standard port 27017.
+
+3. **Network Access / IP Whitelist on Atlas**:
+   - The cluster is configured with `0.0.0.0/0` (Allow access from anywhere), allowing connections from any location worldwide.
+
 ## 🏷️ Release Tags
 - `v1.0.0-m1`: Milestone 1 — Static Front-End Skeleton
 - `v2.0.0-m2`: Milestone 2 — Working REST APIs Integrated with Frontend

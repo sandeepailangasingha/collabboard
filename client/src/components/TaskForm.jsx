@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { PlusCircle, CheckCircle2 } from 'lucide-react';
+
+const DRAFT_STORAGE_KEY = 'syncboard_task_draft';
 
 export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus = 'todo' }) {
   const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
   });
 
   const [errors, setErrors] = useState({});
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
 
   useEffect(() => {
     if (initialTask) {
@@ -22,11 +25,32 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
         description: initialTask.description || '',
         status: initialTask.status || defaultStatus,
         priority: initialTask.priority || 'medium',
-        assigneeName: initialTask.assignee ? initialTask.assignee.name : '',
+        assigneeName: initialTask.assignee ? (typeof initialTask.assignee === 'string' ? initialTask.assignee : initialTask.assignee.name) : '',
         tags: initialTask.tags ? initialTask.tags.join(', ') : '',
         dueDate: initialTask.dueDate || '',
       });
     } else {
+      // Check for cached in-progress work in localStorage (Step 6 Caching)
+      try {
+        const cachedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+        if (cachedDraft) {
+          const parsed = JSON.parse(cachedDraft);
+          setFormData({
+            title: parsed.title || '',
+            description: parsed.description || '',
+            status: parsed.status || defaultStatus,
+            priority: parsed.priority || 'medium',
+            assigneeName: parsed.assigneeName || '',
+            tags: parsed.tags || '',
+            dueDate: parsed.dueDate || '',
+          });
+          setHasRestoredDraft(true);
+          return;
+        }
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+
       setFormData({
         title: '',
         description: '',
@@ -40,12 +64,37 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
     setErrors({});
   }, [initialTask, defaultStatus]);
 
+  // Save in-progress draft to localStorage whenever typing for new tasks
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      if (!initialTask) {
+        try {
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(updated));
+        } catch (err) {
+          // localStorage full or disabled
+        }
+      }
+      return updated;
+    });
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleClearDraft = () => {
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    setFormData({
+      title: '',
+      description: '',
+      status: defaultStatus,
+      priority: 'medium',
+      assigneeName: '',
+      tags: '',
+      dueDate: '',
+    });
+    setHasRestoredDraft(false);
   };
 
   const validate = () => {
@@ -61,7 +110,6 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
     e.preventDefault();
     if (!validate()) return;
 
-    // Helper to generate color and initials for assignee
     const getInitials = (name) => {
       if (!name) return 'U';
       const parts = name.trim().split(' ');
@@ -85,23 +133,52 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
       description: formData.description.trim(),
       status: formData.status,
       priority: formData.priority,
-      assignee: formData.assigneeName
-        ? {
-            name: formData.assigneeName.trim(),
-            initials: getInitials(formData.assigneeName),
-            color: initialTask?.assignee?.color || randomColor,
-          }
-        : { name: 'Unassigned', initials: 'UN', color: '#6b7280' },
+      assignee: formData.assigneeName ? formData.assigneeName.trim() : 'Unassigned',
       tags: processedTags,
       dueDate: formData.dueDate || new Date().toISOString().split('T')[0],
-      createdDate: initialTask?.createdDate || new Date().toISOString().split('T')[0],
     };
+
+    // Clear draft cache upon successful submission
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
 
     onSave(taskPayload);
   };
 
   return (
     <form onSubmit={handleSubmit} className="task-form">
+      {hasRestoredDraft && !initialTask && (
+        <div
+          style={{
+            background: 'rgba(99, 102, 241, 0.15)',
+            border: '1px solid rgba(99, 102, 241, 0.3)',
+            borderRadius: '6px',
+            padding: '0.5rem 0.75rem',
+            marginBottom: '1rem',
+            fontSize: '0.8rem',
+            color: '#a5b4fc',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span>Restored in-progress work from local client cache (Step 6 Caching)</span>
+          <button
+            type="button"
+            onClick={handleClearDraft}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#f87171',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              textDecoration: 'underline',
+            }}
+          >
+            Discard Draft
+          </button>
+        </div>
+      )}
+
       <div className="form-group">
         <label htmlFor="task-title" className="form-label required">
           Task Title
@@ -113,7 +190,7 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
           value={formData.title}
           onChange={handleChange}
           placeholder="e.g. Implement user login UI"
-          className={`form-input ${errors.title ? 'input-error' : ''}`}
+          className={orm-input }
           autoFocus
         />
         {errors.title && <span className="error-message">{errors.title}</span>}
