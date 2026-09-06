@@ -13,14 +13,9 @@ jobs:
 
     services:
       mongodb:
-        image: mongo:7
+        image: mongo:6.0
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout Code
@@ -38,49 +33,69 @@ jobs:
           cd server
           npm ci || npm install
 
-      - name: Seed Test User into Local MongoDB
+      - name: Wait for MongoDB Service
         run: |
-          mongosh mongodb://localhost:27017/syncboard_test --eval '
-            db.users.deleteMany({ email: "sandeepa@example.com" });
-            db.users.insertOne({
-              name: "Sandeepa Ilangasingha",
-              email: "sandeepa@example.com",
-              password: "password123",
-              role: "Admin",
-              avatarColor: "#6366f1",
-              createdAt: new Date(),
-              updatedAt: new Date()
-            });
-            print("Test user seeded OK");
-          '
+          node -e "
+            const net = require('net');
+            function check(retries = 30) {
+              const client = net.createConnection(27017, '127.0.0.1', () => {
+                console.log('MongoDB service is ready on 127.0.0.1:27017');
+                client.destroy();
+                process.exit(0);
+              });
+              client.on('error', () => {
+                if (retries <= 1) {
+                  console.error('Timeout waiting for MongoDB service');
+                  process.exit(1);
+                }
+                setTimeout(() => check(retries - 1), 1000);
+              });
+            }
+            check();
+          "
+
+      - name: Seed Database
+        env:
+          MONGO_URI: mongodb://127.0.0.1:27017/syncboard_test
+          NODE_ENV: test
+        run: |
+          cd server
+          node src/seed.js
 
       - name: Start Server in Background
         env:
           PORT: 5000
           JWT_SECRET: syncboard_test_jwt_secret
-          MONGO_URI: mongodb://localhost:27017/syncboard_test
+          MONGO_URI: mongodb://127.0.0.1:27017/syncboard_test
           NODE_ENV: test
         run: |
           cd server
           node src/server.js &
-          echo "Server started (PID $!)"
+          echo "Server running in background"
 
       - name: Wait for Server to be Ready
         run: |
-          echo "Waiting for server on port 5000..."
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:5000/api > /dev/null 2>&1; then
-              echo "Server ready after ${i}s"
-              break
-            fi
-            echo "  Attempt $i/30 - not ready yet..."
-            sleep 1
-          done
-          curl -sf http://localhost:5000/api || (echo "ERROR: Server never became ready" && exit 1)
+          node -e "
+            async function waitServer(retries = 30) {
+              for (let i = 1; i <= retries; i++) {
+                try {
+                  const res = await fetch('http://127.0.0.1:5000/api');
+                  if (res.ok) {
+                    console.log('Server is responsive after ' + i + ' attempts');
+                    process.exit(0);
+                  }
+                } catch (e) {}
+                await new Promise(r => setTimeout(r, 1000));
+              }
+              console.error('Server failed to start in time');
+              process.exit(1);
+            }
+            waitServer();
+          "
 
       - name: Run Backend Integration & Unit Tests
         env:
-          TEST_API_URL: http://localhost:5000/api
+          TEST_API_URL: http://127.0.0.1:5000/api
         run: |
           cd server
           npm test
