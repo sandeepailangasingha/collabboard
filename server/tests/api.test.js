@@ -1,9 +1,21 @@
-﻿import { test, describe } from 'node:test';
+﻿import { test, describe, before } from 'node:test';
 import assert from 'node:assert/strict';
 
 const BASE_URL = process.env.TEST_API_URL || 'http://localhost:5000/api';
 
 describe('SyncBoard Backend REST API & Real-Time Engine Tests', () => {
+  before(async () => {
+    // Poll until server is ready (up to 15 seconds)
+    for (let i = 0; i < 15; i++) {
+      try {
+        const res = await fetch(`${BASE_URL}`);
+        if (res.ok) return;
+      } catch (e) {
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+  });
+
   test('GET /api - Status check returns online and real-time engine info', async () => {
     const res = await fetch(`${BASE_URL}`);
     assert.equal(res.status, 200);

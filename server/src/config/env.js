@@ -3,5 +3,5 @@ dotenv.config();
 
 export const PORT = process.env.PORT || 5000;
 export const JWT_SECRET = process.env.JWT_SECRET || 'syncboard_jwt_secret_2026_collabboard';
-export const MONGO_URI = process.env.MONGO_URI || '';
+export const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://sandeepakavindu88_admin:AtlasM3Password2026!@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0';
 export const NODE_ENV = process.env.NODE_ENV || 'development';
