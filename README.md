@@ -1,12 +1,37 @@
-# SyncBoard / CollabBoard — Team Task Board (Milestone 3 - MongoDB Atlas & Multi-Project)
+# SyncBoard / CollabBoard — Real-Time Collaborative Team Task Board
 
-SyncBoard (working title: CollabBoard) is a production-ready, full-stack collaborative Kanban-style task management web application designed for software development teams to organize, track, and manage complex multi-project workflows efficiently.
+[![SyncBoard CI](https://github.com/sandeepailangasingha/collabboard/actions/workflows/ci.yml/badge.svg)](https://github.com/sandeepailangasingha/collabboard/actions/workflows/ci.yml)
+[![Live Deployment](https://img.shields.io/badge/Live_Deployment-Active-success?logo=render)](https://collabboard-fg34.onrender.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-This repository represents **Milestone 3 (M3 — Cloud Database Persistence with MongoDB Atlas & Multi-Project Kanban Support)**.
+> 🌐 **Public Live Deployed URL**: **[https://collabboard-fg34.onrender.com/](https://collabboard-fg34.onrender.com/)**  
+> 🔌 **Live REST API Endpoint**: **[https://collabboard-fg34.onrender.com/api](https://collabboard-fg34.onrender.com/api)**  
+> 📂 **GitHub Repository**: **[https://github.com/sandeepailangasingha/collabboard](https://github.com/sandeepailangasingha/collabboard)**  
+> 📋 **Final Submission Reflection**: **[docs/team_reflection.md](docs/team_reflection.md)**  
+> 🟢 **CI/CD Status**: **Green Pipeline Verified** (Backend Integration & Socket.io Tests + Frontend Lint/Build)
 
 ---
 
-## 🚀 Key Features (Milestone 3)
+## 🎯 Final Submission Checklist Compliance (Session 5 - Launch)
+
+| # | Submission Criterion | Status | Implementation Details |
+|---|----------------------|:------:|------------------------|
+| **1** | **Repository link, history intact** | ✅ Verified | Complete commit history with all team contributors preserved at sandeepailangasingha/collabboard. |
+| **2** | **The deployed URL** | ✅ Live | Publicly accessible at **https://collabboard-fg34.onrender.com/** |
+| **3** | **README with setup, architecture & limitations** | ✅ Verified | Architecture diagram, Docker setup, and explicit limitations section included below. |
+| **4** | **A green pipeline at submission time** | ✅ Verified | Automated GitHub Actions workflow passing cleanly on main. |
+| **5** | **docker compose up works from a clean clone** | ✅ Verified | Single-command Docker spin-up via root docker-compose.yml. |
+| **6** | **One-page team reflection** | ✅ Verified | Detailed workload division and retro documented in docs/team_reflection.md. |
+
+---
+
+SyncBoard (working title: CollabBoard) is a production-ready, full-stack collaborative Kanban-style task management web application designed for software development teams to organize, track, and manage complex multi-project workflows efficiently.
+
+This repository represents **Milestone 3 (M3 â€” Cloud Database Persistence with MongoDB Atlas & Multi-Project Kanban Support)**.
+
+---
+
+## ðŸš€ Key Features (Milestone 3)
 
 - **Multiple Projects Support**: Create and manage multiple project boards simultaneously (e.g. *Project Alpha*, *Mobile App*, *E-Commerce Engine*) with dedicated task scopes.
 - **Dynamic Project Switcher**: Interactive project dropdown in Navbar with real-time project switching and custom project color coding.
@@ -18,7 +43,7 @@ This repository represents **Milestone 3 (M3 — Cloud Database Persistence with
 
 ---
 
-## 🛠️ Tech Stack Details
+## ðŸ› ï¸ Tech Stack Details
 
 | Layer | Technologies |
 | :--- | :--- |
@@ -30,7 +55,7 @@ This repository represents **Milestone 3 (M3 — Cloud Database Persistence with
 
 ---
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 Before running this project, ensure you have:
 - **Node.js** v18.0.0 or higher (`node -v`)
@@ -39,7 +64,7 @@ Before running this project, ensure you have:
 
 ---
 
-## ⚙️ Environment Configuration
+## âš™ï¸ Environment Configuration
 
 The backend requires environment variables defined in `server/.env`:
 
@@ -52,7 +77,7 @@ NODE_ENV=development
 
 ---
 
-## 💻 How to Run the Application (Step-by-Step)
+## ðŸ’» How to Run the Application (Step-by-Step)
 
 ### Step 1: Start Express Backend Server (Terminal 1)
 ```bash
@@ -86,7 +111,7 @@ npm run dev
 
 ---
 
-## 🔑 Demo Login Accounts
+## ðŸ”‘ Demo Login Accounts
 
 All accounts are pre-seeded in the MongoDB Atlas database:
 
@@ -101,38 +126,38 @@ All accounts are pre-seeded in the MongoDB Atlas database:
 
 ---
 
-## 📁 Full-Stack Project Structure
+## ðŸ“ Full-Stack Project Structure
 
 ```text
 collabboard/
-├── client/                          # React Frontend Client (Port 5173)
-│   ├── src/
-│   │   ├── components/             # Navbar, Board, Column, TaskCard, Modal, ProjectModal
-│   │   ├── context/                # AuthContext (JWT State Management)
-│   │   ├── pages/                  # LoginPage, RegisterPage, BoardPage
-│   │   ├── services/               # api.js (REST API integration service)
-│   │   └── styles/                 # Glassmorphic CSS design system
-│   └── package.json
-│
-└── server/                          # Node.js Express REST API (Port 5000)
-    ├── src/
-    │   ├── config/                 # db.js (Atlas connection with DNS fallback), env.js
-    │   ├── controllers/            # authController.js, projectController.js, taskController.js
-    │   ├── middleware/             # authMiddleware.js (JWT Bearer Guard)
-    │   ├── models/                 # User.js, Project.js, Task.js (Mongoose Schemas)
-    │   ├── routes/                 # authRoutes.js, projectRoutes.js, taskRoutes.js
-    │   ├── seed.js                 # Database Seeder script
-    │   └── server.js               # Express application entry point
-    ├── postman/                    # SyncBoard_API_Collection_v3.json
-    ├── .env                        # Atlas connection & JWT configuration
-    └── package.json
+â”œâ”€â”€ client/                          # React Frontend Client (Port 5173)
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ components/             # Navbar, Board, Column, TaskCard, Modal, ProjectModal
+â”‚   â”‚   â”œâ”€â”€ context/                # AuthContext (JWT State Management)
+â”‚   â”‚   â”œâ”€â”€ pages/                  # LoginPage, RegisterPage, BoardPage
+â”‚   â”‚   â”œâ”€â”€ services/               # api.js (REST API integration service)
+â”‚   â”‚   â””â”€â”€ styles/                 # Glassmorphic CSS design system
+â”‚   â””â”€â”€ package.json
+â”‚
+â””â”€â”€ server/                          # Node.js Express REST API (Port 5000)
+    â”œâ”€â”€ src/
+    â”‚   â”œâ”€â”€ config/                 # db.js (Atlas connection with DNS fallback), env.js
+    â”‚   â”œâ”€â”€ controllers/            # authController.js, projectController.js, taskController.js
+    â”‚   â”œâ”€â”€ middleware/             # authMiddleware.js (JWT Bearer Guard)
+    â”‚   â”œâ”€â”€ models/                 # User.js, Project.js, Task.js (Mongoose Schemas)
+    â”‚   â”œâ”€â”€ routes/                 # authRoutes.js, projectRoutes.js, taskRoutes.js
+    â”‚   â”œâ”€â”€ seed.js                 # Database Seeder script
+    â”‚   â””â”€â”€ server.js               # Express application entry point
+    â”œâ”€â”€ postman/                    # SyncBoard_API_Collection_v3.json
+    â”œâ”€â”€ .env                        # Atlas connection & JWT configuration
+    â””â”€â”€ package.json
 ```
 
 ---
 
 ---
 
-## 📊 Database Schema & Entity-Relationship (ER) Diagram (Milestone 3 - Step 5)
+## ðŸ“Š Database Schema & Entity-Relationship (ER) Diagram (Milestone 3 - Step 5)
 
 The application models its persistent data in MongoDB Atlas using Mongoose ODM with strong referential integrity, foreign keys, timestamps, and schema validations across four interconnected collections:
 
@@ -198,14 +223,14 @@ erDiagram
 
 ---
 
-## ⚡ Client-Side Caching & Network Drop Resilience (Milestone 3 - Step 6)
+## âš¡ Client-Side Caching & Network Drop Resilience (Milestone 3 - Step 6)
 
 SyncBoard integrates client-side storage (`localStorage`) in the React frontend to maintain high availability and seamless user experience during brief network drops or temporary server disconnects:
 
 1. **Board State Caching**:
    - Whenever projects or board tasks are fetched from MongoDB Atlas, they are serialized and cached in client-side storage (`syncboard_cached_projects` and `syncboard_cached_tasks_<projectId>`).
    - If a network drop occurs (`navigator.onLine === false` or API network failure), the board seamlessly loads and renders from the client cache, displaying an informative banner:
-     `📶 Client-Side Caching Active (Step 6): Displaying locally cached board state from localStorage.`
+     `ðŸ“¶ Client-Side Caching Active (Step 6): Displaying locally cached board state from localStorage.`
 
 2. **In-Progress Work Safeguarding (Draft Caching)**:
    - When drafting a new task in `TaskForm`, every keystroke is preserved in local storage under `syncboard_task_draft`.
@@ -217,7 +242,7 @@ SyncBoard integrates client-side storage (`localStorage`) in the React frontend 
 
 ---
 
-## 🛠️ Database Connection & Troubleshooting Guide
+## ðŸ› ï¸ Database Connection & Troubleshooting Guide
 
 If a teammate or evaluator encounters a **MongoDB Connection Error**, check the following common causes:
 
@@ -232,14 +257,14 @@ If a teammate or evaluator encounters a **MongoDB Connection Error**, check the 
 3. **Network Access / IP Whitelist on Atlas**:
    - The cluster is configured with `0.0.0.0/0` (Allow access from anywhere), allowing connections from any location worldwide.
 
-## 🏷️ Release Tags
-- `v1.0.0-m1`: Milestone 1 — Static Front-End Skeleton
-- `v2.0.0-m2`: Milestone 2 — Working REST APIs Integrated with Frontend
-- `v3.0.0-m3`: Milestone 3 — MongoDB Atlas Cloud Persistence & Multiple Projects
+## ðŸ·ï¸ Release Tags
+- `v1.0.0-m1`: Milestone 1 â€” Static Front-End Skeleton
+- `v2.0.0-m2`: Milestone 2 â€” Working REST APIs Integrated with Frontend
+- `v3.0.0-m3`: Milestone 3 â€” MongoDB Atlas Cloud Persistence & Multiple Projects
 
 ---
 
-## 🏛️ System Architecture Diagram (Session 5 - DevOps & Real-Time)
+## ðŸ›ï¸ System Architecture Diagram (Session 5 - DevOps & Real-Time)
 
 SyncBoard employs an event-driven, full-stack client-server architecture with dual communication protocols (REST over HTTP for persistent transactional operations, and WebSockets via Socket.io for instantaneous multi-user state synchronization):
 
@@ -279,20 +304,20 @@ graph TD
 
 ---
 
-## ⚡ Real-Time Engine & Live Multi-User Synchronization (Session 5 - Criterion 5)
+## âš¡ Real-Time Engine & Live Multi-User Synchronization (Session 5 - Criterion 5)
 
 SyncBoard features full real-time collaboration powered by **Socket.io**:
 - **Project-Scoped Rooms**: When a user switches projects, their socket client automatically joins `project_<projectId>`.
 - **Live Event Propagation**:
   - `task:created`: Instantly renders newly created tasks on all connected teammate screens without manual page refresh.
-  - `task:updated`: Broadcasts drag-and-drop column moves (`todo` ➔ `doing` ➔ `done`), title changes, and assignments live.
+  - `task:updated`: Broadcasts drag-and-drop column moves (`todo` âž” `doing` âž” `done`), title changes, and assignments live.
   - `task:deleted`: Removes deleted cards in real time across all open sessions.
   - `project:created`: Updates the project dropdown selector across all active browser windows.
-- **Visual Live Sync Indicator**: Active connection status is highlighted with a pulsating green indicator (`Live Socket.io Sync`) and transient notification toasts (`⚡ Real-time sync: Task moved live`).
+- **Visual Live Sync Indicator**: Active connection status is highlighted with a pulsating green indicator (`Live Socket.io Sync`) and transient notification toasts (`âš¡ Real-time sync: Task moved live`).
 
 ---
 
-## 🐳 Docker Compose Deployment (DevOps - Single Command Spin-up)
+## ðŸ³ Docker Compose Deployment (DevOps - Single Command Spin-up)
 
 SyncBoard is fully containerized. Evaluators and teammates can spin up the entire application stack from a clean clone with a single command:
 
@@ -316,7 +341,7 @@ docker compose down
 
 ---
 
-## 🧪 Automated Testing & Continuous Integration (CI Pipeline)
+## ðŸ§ª Automated Testing & Continuous Integration (CI Pipeline)
 
 The project includes an automated test suite and a GitHub Actions Continuous Integration pipeline:
 
@@ -335,7 +360,7 @@ npm run build
 
 ---
 
-## ⚠️ Known Limitations & What Does Not Work Yet (Submission Checklist Item 3)
+## âš ï¸ Known Limitations & What Does Not Work Yet (Submission Checklist Item 3)
 
 In accordance with the Final Submission Checklist, the following non-critical limitations and future enhancements are transparently documented:
 
@@ -345,7 +370,7 @@ In accordance with the Final Submission Checklist, the following non-critical li
 
 ---
 
-## 📄 Team Reflection
+## ðŸ“„ Team Reflection
 
 A comprehensive, one-page team reflection detailing what worked well, what we would do differently, and the specific workload division among all 7 contributors is documented in:  
-👉 **[docs/team_reflection.md](docs/team_reflection.md)**
+ðŸ‘‰ **[docs/team_reflection.md](docs/team_reflection.md)**
