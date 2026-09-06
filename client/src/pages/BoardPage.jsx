@@ -11,7 +11,7 @@ import { CheckCircle2, Clock, Circle, Sparkles, RotateCcw, Wifi, WifiOff, Databa
 import '../styles/Board.css';
 
 const CACHE_PROJECTS_KEY = 'syncboard_cached_projects';
-const getTasksCacheKey = (projId) => syncboard_cached_tasks_;
+const getTasksCacheKey = (projId) => `syncboard_cached_tasks_${projId}`;
 
 export default function BoardPage() {
   const { user, logout } = useContext(AuthContext);
@@ -455,3 +455,4 @@ export default function BoardPage() {
     </div>
   );
 }
+

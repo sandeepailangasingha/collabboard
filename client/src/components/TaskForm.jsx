@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { PlusCircle, CheckCircle2 } from 'lucide-react';
 
@@ -190,7 +190,7 @@ export default function TaskForm({ initialTask, onSave, onCancel, defaultStatus 
           value={formData.title}
           onChange={handleChange}
           placeholder="e.g. Implement user login UI"
-          className={orm-input }
+          className="form-input"
           autoFocus
         />
         {errors.title && <span className="error-message">{errors.title}</span>}

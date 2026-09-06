@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { Calendar, Edit3, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import '../styles/TaskCard.css';
 
 export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
-  const { id, title, description, status, priority, assignee, createdDate, dueDate, tags } = task;
+  const { id, title, description, status, priority, assignee, createdDate, dueDate, tags, createdAt } = task;
 
   const priorityColors = {
     high: 'priority-high',
@@ -27,14 +27,26 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
     else if (status === 'doing') onStatusChange(id, 'todo');
   };
 
+  const assigneeName = typeof assignee === 'object' && assignee !== null 
+    ? (assignee.name || 'Unassigned') 
+    : (assignee || '');
+
+  const assigneeInitials = typeof assignee === 'object' && assignee !== null 
+    ? (assignee.initials || (assignee.name ? assignee.name.charAt(0).toUpperCase() : 'U'))
+    : (assignee ? assignee.slice(0, 2).toUpperCase() : 'U');
+
+  const assigneeColor = (typeof assignee === 'object' && assignee?.color) ? assignee.color : '#6366f1';
+
+  const displayDate = dueDate || createdDate || (createdAt ? new Date(createdAt).toLocaleDateString() : '');
+
   return (
     <div className={`task-card status-border-${status}`}>
       <div className="task-card-header">
         <div className="task-badges">
           <span className={`priority-badge ${priorityColors[priority] || ''}`}>
-            {priority.toUpperCase()}
+            {(priority || 'medium').toUpperCase()}
           </span>
-          {tags && tags.map((tag, idx) => (
+          {Array.isArray(tags) && tags.map((tag, idx) => (
             <span key={idx} className="tag-badge">
               {tag}
             </span>
@@ -62,24 +74,24 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
       </div>
 
       <h3 className="task-title">{title}</h3>
-      <p className="task-description">{description}</p>
+      {description && <p className="task-description">{description}</p>}
 
       <div className="task-meta">
-        {createdDate && (
-          <div className="task-date" title={`Created on ${createdDate}`}>
+        {displayDate && (
+          <div className="task-date" title={`Date: ${displayDate}`}>
             <Calendar size={13} />
-            <span>{createdDate}</span>
+            <span>{displayDate}</span>
           </div>
         )}
-        {assignee && (
-          <div className="task-assignee" title={`Assigned to ${assignee.name}`}>
+        {assigneeName && (
+          <div className="task-assignee" title={`Assigned to ${assigneeName}`}>
             <div
               className="assignee-avatar"
-              style={{ backgroundColor: assignee.color || '#6366f1' }}
+              style={{ backgroundColor: assigneeColor }}
             >
-              {assignee.initials || assignee.name.charAt(0)}
+              {assigneeInitials}
             </div>
-            <span className="assignee-name">{assignee.name}</span>
+            <span className="assignee-name">{assigneeName}</span>
           </div>
         )}
       </div>
