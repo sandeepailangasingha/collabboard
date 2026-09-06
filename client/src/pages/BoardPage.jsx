@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Navbar from '../components/Navbar';
 import Board from '../components/Board';
 import Modal from '../components/Modal';
@@ -163,29 +163,29 @@ export default function BoardPage() {
 
     const onTaskCreated = (newTask) => {
       const normalized = { ...newTask, id: newTask._id || newTask.id };
-      const taskProjId = normalized.project || normalized.projectId;
-      if (taskProjId === selectedProject.id) {
+      const taskProjId = String(normalized.project?._id || normalized.project || normalized.projectId || "");
+      if (taskProjId === String(selectedProject.id)) {
         setTasks((prev) => {
           if (prev.some((t) => t.id === normalized.id)) return prev;
           return [normalized, ...prev];
         });
-        triggerLiveAlert(`⚡ Real-time sync: New task "${normalized.title}" created by teammate`);
+        triggerLiveAlert(`? Real-time sync: New task "${normalized.title}" created by teammate`);
       }
     };
 
     const onTaskUpdated = (updatedTask) => {
       const normalized = { ...updatedTask, id: updatedTask._id || updatedTask.id };
-      const taskProjId = normalized.project || normalized.projectId;
-      if (taskProjId === selectedProject.id) {
+      const taskProjId = String(normalized.project?._id || normalized.project || normalized.projectId || "");
+      if (taskProjId === String(selectedProject.id)) {
         setTasks((prev) => prev.map((t) => (t.id === normalized.id ? normalized : t)));
-        triggerLiveAlert(`⚡ Real-time sync: Task "${normalized.title}" moved to ${normalized.status.toUpperCase()}`);
+        triggerLiveAlert(`? Real-time sync: Task "${normalized.title}" moved to ${normalized.status.toUpperCase()}`);
       }
     };
 
     const onTaskDeleted = ({ taskId, projectId }) => {
-      if (projectId === selectedProject.id) {
+      if (String(projectId) === String(selectedProject.id)) {
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
-        triggerLiveAlert(`⚡ Real-time sync: Task was removed by a teammate`);
+        triggerLiveAlert(`? Real-time sync: Task was removed by a teammate`);
       }
     };
 
@@ -195,7 +195,7 @@ export default function BoardPage() {
         if (prev.some((p) => p.id === normalized.id)) return prev;
         return [normalized, ...prev];
       });
-      triggerLiveAlert(`⚡ Real-time sync: New project "${normalized.name}" created`);
+      triggerLiveAlert(`? Real-time sync: New project "${normalized.name}" created`);
     };
 
     socketService.on('task:created', onTaskCreated);
