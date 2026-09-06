@@ -9,6 +9,6 @@
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        value: mongodb+srv://sandeepakavindu88_admin:AtlasM3Password2026!@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0
+        value: mongodb+srv://naveenlakshan0416_db_user:qUnvB39Yw3HOqnJQ@cluster0.4820k0e.mongodb.net/syncboard?retryWrites=true&w=majority&appName=Cluster0
       - key: JWT_SECRET
         value: syncboard_jwt_secret_2026_collabboard
